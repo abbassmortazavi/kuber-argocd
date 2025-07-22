@@ -30,3 +30,4 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 * ArgoCD Configuration: [https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/](https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/)
 # kuber-argocd
 # kuber-argocd
+# kuber-argocd
