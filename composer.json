@@ -1,0 +1,19 @@
+{
+    "name": "patoghi/app",
+    "description": "this is a my description",
+    "type": "project",
+    "require": {
+        "php": "^8.4"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Patoghi\\App\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Abbass Mortazavi"
+        }
+    ]
+}

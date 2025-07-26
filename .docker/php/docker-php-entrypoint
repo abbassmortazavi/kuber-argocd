@@ -1,0 +1,71 @@
+#!/bin/sh
+set -e
+
+# Function to log messages
+log() {
+    echo "  $1"
+}
+
+# Function to run Laravel artisan commands
+run_artisan() {
+    php artisan "$@" -q || log "Warning: Failed to run artisan $*"
+}
+
+# Wait for database to be ready (assuming MySQL)
+wait_for_db() {
+    log "Waiting for database connection..."
+    max_tries=60
+    while ! php artisan db:monitor --max=1 >/dev/null 2>&1; do
+        max_tries=$((max_tries - 1))
+        echo "Still waiting for database to be ready... Or maybe the database is not reachable. $max_tries attempts left."
+        if [ $max_tries -eq 0 ]; then
+            log "Error: Could not connect to the database."
+            exit 1
+        fi
+        sleep 1
+    done
+    log "Database connection established."
+}
+
+# Main execution
+main() {
+    # Environment-specific actions
+    case "${APP_ENV}" in
+        "test"|"dev"|"local")
+            log "Environment: ${APP_ENV}"
+            wait_for_db
+            sleep 5
+            ;;
+        "production"|"prod")
+            log "Environment: ${APP_ENV}"
+            wait_for_db
+            log "Optimizing for production..."
+            run_artisan optimize:clear
+            run_artisan optimize
+            ;;
+        *)
+            log "Unknown environment: ${APP_ENV}"
+            ;;
+    esac
+
+    # Check if we need to run migrations
+    if [ "${RUN_MIGRATIONS}" = "true" ]; then
+        log "Running database migrations..."
+        run_artisan migrate --force
+    fi
+
+    # Execute the command
+
+    # first arg is `-f` or `--some-option`
+    if [ "${1#-}" != "$1" ]; then
+        set -- rr "$@"
+    fi
+
+    # Execute the command with the provided arguments
+    # This is typically the command to start the web server or application server
+    log "Starting the application server..."
+    exec "$@"
+}
+
+# Run the main function
+main "$@"
